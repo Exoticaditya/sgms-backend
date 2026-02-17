@@ -33,11 +33,17 @@ public class StartupValidation implements ApplicationListener<ApplicationReadyEv
   private final JdbcTemplate jdbcTemplate;
 
   // Required database tables for SGMS
+  // PHASE 1: Core authentication and guards
+  // PHASE 2: Client and site management
+  // PHASE 3: Site posts and access control
   private static final List<String> REQUIRED_TABLES = List.of(
       "users",
       "guards",
       "client_accounts",
-      "sites"
+      "sites",
+      "site_posts",
+      "supervisor_site_mapping",
+      "client_site_access"
   );
 
   public StartupValidation(DataSource dataSource, JdbcTemplate jdbcTemplate) {

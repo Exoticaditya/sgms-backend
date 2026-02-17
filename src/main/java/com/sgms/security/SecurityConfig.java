@@ -95,7 +95,7 @@ public class SecurityConfig {
     }
     
     // Use setAllowedOriginPatterns to support wildcard patterns like *.netlify.app
-    config.setAllowedOriginPatterns(origins.stream().toList());
+    config.setAllowedOriginPatterns(origins);
     
     // Strict method whitelist
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
