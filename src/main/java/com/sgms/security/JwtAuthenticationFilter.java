@@ -67,4 +67,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     objectMapper.writeValue(response.getOutputStream(), Map.of("error", message));
   }
+
+  @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) {
+    String path = request.getRequestURI();
+    
+    // Skip JWT filter for public authentication endpoints
+    return path.startsWith("/api/auth/") ||
+           path.startsWith("/actuator/health");
+  }
 }
