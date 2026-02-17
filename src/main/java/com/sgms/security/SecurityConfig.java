@@ -61,16 +61,19 @@ public class SecurityConfig {
     CorsConfiguration config = new CorsConfiguration();
     List<String> origins;
     if (allowedOrigins == null || allowedOrigins.isBlank()) {
-      origins = List.of("*");
+      origins = List.of(
+          "https://zplusesecurity.com",
+          "https://www.zplusesecurity.com"
+      );
     } else {
       origins = Arrays.stream(allowedOrigins.split(","))
           .map(String::trim)
-          .filter(s -> !s.isBlank())
+          .filter(s -> !s.isBlank() && !s.equals("*"))
           .toList();
     }
     config.setAllowedOrigins(origins);
-    config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-    config.setAllowedHeaders(List.of("*"));
+    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
     config.setExposedHeaders(List.of("Authorization"));
     config.setAllowCredentials(false);
 

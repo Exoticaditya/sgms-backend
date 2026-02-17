@@ -1,17 +1,31 @@
 server:
-  port: ${PORT}
+  port: ${PORT:8080}
   forward-headers-strategy: framework
+  shutdown: graceful
 
 spring:
   datasource:
-    url: ${DATABASE_URL}
+    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
     username: ${PGUSER}
     password: ${PGPASSWORD}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+      pool-name: SGMSHikariPool
+
   jpa:
     hibernate:
       ddl-auto: none
     show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
 
 app:
   security:
@@ -20,4 +34,12 @@ app:
       issuer: sgms
       access-token-ttl-seconds: ${JWT_ACCESS_TTL_SECONDS:86400}
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:}
+    allowed-origins: https://zplusesecurity.com,https://www.zplusesecurity.com
+
+logging:
+  level:
+    root: INFO
+    com.sgms: INFO
+    org.hibernate.SQL: OFF
+    org.hibernate.type: OFF
+    org.springframework.web: INFO
