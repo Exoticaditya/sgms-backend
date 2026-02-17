@@ -1,5 +1,6 @@
 package com.sgms.guard;
 
+import com.sgms.common.ApiResponse;
 import com.sgms.guard.dto.CreateGuardRequest;
 import com.sgms.guard.dto.GuardResponse;
 import com.sgms.security.UserPrincipal;
@@ -31,32 +32,36 @@ public class GuardController {
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.CREATED)
-  public GuardResponse createGuard(@Valid @RequestBody CreateGuardRequest request) {
-    return guardService.createGuard(request);
+  public ApiResponse<GuardResponse> createGuard(@Valid @RequestBody CreateGuardRequest request) {
+    GuardResponse guard = guardService.createGuard(request);
+    return ApiResponse.created(guard, "Guard created successfully");
   }
 
   @GetMapping
   @PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR')")
-  public List<GuardResponse> getAllGuards(@AuthenticationPrincipal UserPrincipal principal) {
-    return guardService.getAllGuards(principal);
+  public ApiResponse<List<GuardResponse>> getAllGuards(@AuthenticationPrincipal UserPrincipal principal) {
+    List<GuardResponse> guards = guardService.getAllGuards(principal);
+    return ApiResponse.success(guards);
   }
 
   @GetMapping("/{id}")
   @PreAuthorize("hasAnyRole('ADMIN', 'SUPERVISOR')")
-  public GuardResponse getGuardById(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal) {
-    return guardService.getGuardById(id, principal);
+  public ApiResponse<GuardResponse> getGuardById(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal) {
+    GuardResponse guard = guardService.getGuardById(id, principal);
+    return ApiResponse.success(guard);
   }
 
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
-  public GuardResponse updateGuard(@PathVariable Long id, @Valid @RequestBody CreateGuardRequest request, @AuthenticationPrincipal UserPrincipal principal) {
-    return guardService.updateGuard(id, request, principal);
+  public ApiResponse<GuardResponse> updateGuard(@PathVariable Long id, @Valid @RequestBody CreateGuardRequest request, @AuthenticationPrincipal UserPrincipal principal) {
+    GuardResponse guard = guardService.updateGuard(id, request, principal);
+    return ApiResponse.success(guard, "Guard updated successfully");
   }
 
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteGuard(@PathVariable Long id) {
+  public ApiResponse<Void> deleteGuard(@PathVariable Long id) {
     guardService.deleteGuard(id);
+    return ApiResponse.success(null, "Guard deleted successfully");
   }
 }

@@ -38,19 +38,38 @@ public class SecurityConfig {
   }
 
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+  public SecurityFilterChain securityFilterChain(
+      HttpSecurity http, 
+      JwtAuthenticationFilter jwtAuthenticationFilter,
+      RestAuthenticationEntryPoint restAuthenticationEntryPoint) throws Exception {
     http
+        // API-only: CSRF disabled (stateless JWT authentication)
         .csrf(csrf -> csrf.disable())
+        
+        // CORS configuration with strict origin whitelist
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        
+        // Disable form login and HTTP basic (API uses JWT only)
         .httpBasic(basic -> basic.disable())
         .formLogin(form -> form.disable())
+        
+        // Stateless session management (no server-side sessions)
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        
+        // Authorization rules
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
             .requestMatchers("/actuator/health/**", "/actuator/health").permitAll()
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .anyRequest().authenticated()
         )
+        
+        // Exception handling: return JSON for unauthorized requests
+        .exceptionHandling(exception -> exception
+            .authenticationEntryPoint(restAuthenticationEntryPoint)
+        )
+        
+        // JWT filter runs before UsernamePasswordAuthenticationFilter
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
@@ -59,8 +78,11 @@ public class SecurityConfig {
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
+    
+    // Parse and validate allowed origins from configuration
     List<String> origins;
     if (allowedOrigins == null || allowedOrigins.isBlank()) {
+      // Production defaults - strict whitelist
       origins = List.of(
           "https://zplusesecurity.com",
           "https://www.zplusesecurity.com"
@@ -71,12 +93,21 @@ public class SecurityConfig {
           .filter(s -> !s.isBlank() && !s.equals("*"))
           .toList();
     }
-    config.setAllowedOrigins(origins);
+    
+    // Use setAllowedOriginPatterns to support wildcard patterns like *.netlify.app
+    config.setAllowedOriginPatterns(origins.stream().toList());
+    
+    // Strict method whitelist
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    
+    // Only allow necessary headers
     config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
     config.setExposedHeaders(List.of("Authorization"));
+    
+    // Disable credentials for security (prevents CSRF attacks with wildcards)
     config.setAllowCredentials(false);
-
+    
+    // Apply to all endpoints
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", config);
     return source;

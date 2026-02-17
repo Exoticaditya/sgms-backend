@@ -1,3 +1,16 @@
+# =============================================================================
+# LOCAL DEVELOPMENT PROFILE - NOT USED IN PRODUCTION
+# =============================================================================
+# This file is kept for reference only.
+# Production deployment uses 'prod' profile with Railway DATABASE_URL.
+# 
+# To run locally, you must:
+# 1. Set up local PostgreSQL database
+# 2. Run schema migrations manually
+# 3. Set APP_SECURITY_JWT_SECRET environment variable
+# 4. Use spring.profiles.active=local
+# =============================================================================
+
 server:
   port: 8080
 
@@ -26,7 +39,8 @@ spring:
 app:
   security:
     jwt:
-      secret: ${APP_SECURITY_JWT_SECRET:dev-secret-key-min-256-bits-required-for-hs256-algorithm-do-not-use-in-production}
+      # MUST set APP_SECURITY_JWT_SECRET even for local development
+      secret: ${APP_SECURITY_JWT_SECRET}
       issuer: sgms
       access-token-ttl-seconds: ${JWT_ACCESS_TTL_SECONDS:86400}
   cors:

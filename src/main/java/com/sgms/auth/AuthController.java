@@ -4,6 +4,7 @@ import com.sgms.auth.dto.AuthResponse;
 import com.sgms.auth.dto.LoginRequest;
 import com.sgms.auth.dto.RegisterRequest;
 import com.sgms.auth.dto.UserResponse;
+import com.sgms.common.ApiResponse;
 import com.sgms.security.UserPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -27,18 +28,20 @@ public class AuthController {
 
   @PostMapping("/register")
   @ResponseStatus(HttpStatus.CREATED)
-  public UserResponse register(@Valid @RequestBody RegisterRequest request, Authentication authentication) {
+  public ApiResponse<UserResponse> register(@Valid @RequestBody RegisterRequest request, Authentication authentication) {
     UserPrincipal actor = extractPrincipal(authentication);
-    return authService.register(request, actor);
+    UserResponse user = authService.register(request, actor);
+    return ApiResponse.created(user, "User registered successfully");
   }
 
   @PostMapping("/login")
-  public AuthResponse login(@Valid @RequestBody LoginRequest request) {
-    return authService.login(request);
+  public ApiResponse<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+    AuthResponse authResponse = authService.login(request);
+    return ApiResponse.success(authResponse, "Login successful");
   }
 
   @GetMapping("/me")
-  public UserResponse me(Authentication authentication) {
+  public ApiResponse<UserResponse> me(Authentication authentication) {
     UserPrincipal principal = extractPrincipal(authentication);
     if (principal == null) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
@@ -49,7 +52,7 @@ public class AuthController {
     response.setPhone(principal.getUser().getPhone());
     response.setFullName(principal.getUser().getFullName());
     response.setRoles(principal.getRoleNames().stream().sorted().toList());
-    return response;
+    return ApiResponse.success(response);
   }
 
   private UserPrincipal extractPrincipal(Authentication authentication) {

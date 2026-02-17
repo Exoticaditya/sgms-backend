@@ -4,20 +4,10 @@ server:
   shutdown: graceful
 
 spring:
-  datasource:
-    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
-    username: ${PGUSER}
-    password: ${PGPASSWORD}
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
-      leak-detection-threshold: 60000
-      pool-name: SGMSHikariPool
-
+  # DataSource configuration handled by RailwayPostgresConfig
+  # Reads DATABASE_URL environment variable from Railway
+  # HikariCP pool configured with production-grade settings
+  
   jpa:
     hibernate:
       ddl-auto: none
@@ -34,7 +24,7 @@ app:
       issuer: sgms
       access-token-ttl-seconds: ${JWT_ACCESS_TTL_SECONDS:86400}
   cors:
-    allowed-origins: https://zplusesecurity.com,https://www.zplusesecurity.com
+    allowed-origins: https://zplusesecurity.com,https://www.zplusesecurity.com,https://*.netlify.app
 
 logging:
   level:
