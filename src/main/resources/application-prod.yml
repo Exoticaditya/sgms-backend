@@ -17,12 +17,14 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
   flyway:
-    enabled: true
+    # Disabled in production - schema already exists on Railway database
+    # All migrations (V1-V9) have been manually applied
+    enabled: false
     clean-disabled: true
     baseline-on-migrate: true
     baseline-version: 9
     locations: classpath:db/migration
-    validate-on-migrate: true
+    validate-on-migrate: false
 
 app:
   security:
