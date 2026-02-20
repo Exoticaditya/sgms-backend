@@ -6,6 +6,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -52,7 +53,7 @@ public class StartupValidation implements ApplicationListener<ApplicationReadyEv
   }
 
   @Override
-  public void onApplicationEvent(ApplicationReadyEvent event) {
+  public void onApplicationEvent(@NonNull ApplicationReadyEvent event) {
     logger.info("=== SGMS Production Startup Validation ===");
     
     try {

@@ -1,0 +1,44 @@
+================================================================
+SGMS PROJECT CLEANUP CHECKLIST
+================================================================
+Execute these deletions BEFORE running new migrations.
+
+DELETE THESE DIRECTORIES:
+========================
+target/                                    (Maven build output)
+.mvn/                                      (Maven wrapper - optional)
+build/                                     (Gradle build - if exists)
+.gradle/                                   (Gradle cache - if exists)
+
+DELETE THESE MIGRATION FILES (OLD/CORRUPTED):
+============================================
+src/main/resources/db/migration/V0__client_and_sites.sql
+src/main/resources/db/migration/V1__initial_schema.sql
+src/main/resources/db/migration/V2__phase3_site_posts.sql
+src/main/resources/db/migration/V3__phase_a_guard_deployment.sql
+src/main/resources/db/migration/V4__phase_b_attendance_tracking.sql
+
+DELETE THESE SEED/SCHEMA FILES (IF THEY EXIST):
+==============================================
+src/main/resources/schema.sql
+src/main/resources/data.sql
+src/main/resources/import.sql
+SEED_DATA_COMPLETE.sql (in backend root)
+
+DELETE THESE DIAGNOSTIC FILES (NO LONGER NEEDED):
+================================================
+DB_INTROSPECTION_QUERIES.sql
+PHASE1_SCHEMA_ANALYSIS_REPORT.md
+PHASE2_BACKEND_AUDIT_REPORT.md
+SYSTEM_ARCHITECT_REPORT.md
+QUICK_START.md
+
+KEEP THESE FILES:
+=================
+pom.xml
+src/main/resources/application.yml
+src/main/resources/application-prod.yml
+src/main/resources/application-local.yml
+All Java source files (DO NOT DELETE)
+
+================================================================

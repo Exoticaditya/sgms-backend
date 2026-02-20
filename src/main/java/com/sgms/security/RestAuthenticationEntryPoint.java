@@ -12,6 +12,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Clock;
 
 /**
  * REST Authentication Entry Point
@@ -25,6 +26,11 @@ import java.io.IOException;
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
+  private final Clock clock;
+
+  public RestAuthenticationEntryPoint(Clock clock) {
+    this.clock = clock;
+  }
 
   @Override
   public void commence(
@@ -34,10 +40,9 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     // Create standardized error response
     ErrorResponse errorResponse = new ErrorResponse(
-        "UNAUTHORIZED",
         "Authentication required",
-        HttpStatus.UNAUTHORIZED.value(),
-        request.getRequestURI()
+        request.getRequestURI(),
+        clock
     );
 
     // Set response properties

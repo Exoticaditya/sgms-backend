@@ -1,42 +1,46 @@
 package com.sgms.exception;
 
+import java.time.Clock;
 import java.time.Instant;
 
 /**
  * Standard Error Response
  * 
  * Returned by GlobalExceptionHandler for all error scenarios.
- * Provides consistent error structure across the platform.
+ * Matches ApiResponse wrapper format with success=false.
  * Never exposes stacktraces to clients.
  */
 public class ErrorResponse {
   
-  private String error;
+  private final boolean success = false;
   private String message;
-  private int status;
   private Instant timestamp;
   private String path;
+  private transient Clock clock;
 
   public ErrorResponse() {
-    this.timestamp = Instant.now();
+    this.clock = Clock.systemUTC();
+    this.timestamp = Instant.now(clock);
   }
 
-  public ErrorResponse(String error, String message, int status, String path) {
-    this.error = error;
+  public ErrorResponse(String message, String path) {
+    this.clock = Clock.systemUTC();
     this.message = message;
-    this.status = status;
     this.path = path;
-    this.timestamp = Instant.now();
+    this.timestamp = Instant.now(clock);
+  }
+
+  public ErrorResponse(String message, String path, Clock clock) {
+    this.clock = clock;
+    this.message = message;
+    this.path = path;
+    this.timestamp = clock.instant();
   }
 
   // Getters and Setters
 
-  public String getError() {
-    return error;
-  }
-
-  public void setError(String error) {
-    this.error = error;
+  public boolean isSuccess() {
+    return success;
   }
 
   public String getMessage() {
@@ -45,14 +49,6 @@ public class ErrorResponse {
 
   public void setMessage(String message) {
     this.message = message;
-  }
-
-  public int getStatus() {
-    return status;
-  }
-
-  public void setStatus(int status) {
-    this.status = status;
   }
 
   public Instant getTimestamp() {

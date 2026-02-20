@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,9 +19,11 @@ import java.util.stream.Collectors;
 public class ClientAccountService {
 
   private final ClientAccountRepository clientAccountRepository;
+  private final Clock clock;
 
-  public ClientAccountService(ClientAccountRepository clientAccountRepository) {
+  public ClientAccountService(ClientAccountRepository clientAccountRepository, Clock clock) {
     this.clientAccountRepository = clientAccountRepository;
+    this.clock = clock;
   }
 
   /**
@@ -78,7 +81,7 @@ public class ClientAccountService {
             "Client account not found with id: " + id
         ));
 
-    client.setDeletedAt(Instant.now());
+    client.setDeletedAt(clock.instant());
     client.setStatus("DELETED");
     clientAccountRepository.save(client);
   }

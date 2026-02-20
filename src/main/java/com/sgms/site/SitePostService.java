@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
+import java.time.Clock;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,10 +20,12 @@ public class SitePostService {
 
   private final SitePostRepository sitePostRepository;
   private final SiteRepository siteRepository;
+  private final Clock clock;
 
-  public SitePostService(SitePostRepository sitePostRepository, SiteRepository siteRepository) {
+  public SitePostService(SitePostRepository sitePostRepository, SiteRepository siteRepository, Clock clock) {
     this.sitePostRepository = sitePostRepository;
     this.siteRepository = siteRepository;
+    this.clock = clock;
   }
 
   /**
@@ -149,7 +151,7 @@ public class SitePostService {
             "Site post not found with id: " + id
         ));
 
-    post.setDeletedAt(Instant.now());
+    post.setDeletedAt(clock.instant());
     post.setStatus("DELETED");
     sitePostRepository.save(post);
   }

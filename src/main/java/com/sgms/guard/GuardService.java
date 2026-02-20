@@ -7,6 +7,7 @@ import com.sgms.user.RoleRepository;
 import com.sgms.user.UserEntity;
 import com.sgms.user.UserRepository;
 import com.sgms.security.UserPrincipal;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,12 +24,14 @@ public class GuardService {
   private final UserRepository userRepository;
   private final RoleRepository roleRepository;
   private final PasswordEncoder passwordEncoder;
+  private final Clock clock;
 
-  public GuardService(GuardRepository guardRepository, UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+  public GuardService(GuardRepository guardRepository, UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, Clock clock) {
     this.guardRepository = guardRepository;
     this.userRepository = userRepository;
     this.roleRepository = roleRepository;
     this.passwordEncoder = passwordEncoder;
+    this.clock = clock;
   }
 
   @Transactional
@@ -88,8 +91,7 @@ public class GuardService {
     boolean isSupervisor = principal.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_SUPERVISOR"));
 
     if (isAdmin) {
-      return guardRepository.findAll().stream()
-          .filter(g -> g.getDeletedAt() == null)
+      return guardRepository.findAllActive().stream()
           .map(this::mapToResponse)
           .collect(Collectors.toList());
     } else if (isSupervisor) {
@@ -134,6 +136,17 @@ public class GuardService {
        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only ADMIN can update guard details");
     }
 
+    // Validate email uniqueness if email is being changed
+    if (request.getEmail() != null && !request.getEmail().equalsIgnoreCase(guard.getUser().getEmail())) {
+      if (userRepository.existsByEmailIgnoreCaseAndDeletedAtIsNull(request.getEmail())) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
+      }
+      guard.getUser().setEmail(request.getEmail());
+    } else if (request.getEmail() != null) {
+      // Email same as current, just update in case of case change
+      guard.getUser().setEmail(request.getEmail());
+    }
+
     guard.setFirstName(request.getFirstName());
     guard.setLastName(request.getLastName());
     guard.setPhone(request.getPhone());
@@ -145,6 +158,14 @@ public class GuardService {
     if (request.getSupervisorId() != null) {
        UserEntity supervisor = userRepository.findById(request.getSupervisorId())
           .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Supervisor not found"));
+       
+       // Validate supervisor has SUPERVISOR role
+       boolean isSupervisor = supervisor.getRoles().stream()
+           .anyMatch(r -> "SUPERVISOR".equals(r.getName()));
+       if (!isSupervisor) {
+         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is not a SUPERVISOR");
+       }
+       
        guard.setSupervisor(supervisor);
     }
 
@@ -160,7 +181,7 @@ public class GuardService {
     GuardEntity guard = guardRepository.findById(id)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Guard not found"));
     
-    Instant now = Instant.now();
+    Instant now = clock.instant();
     guard.setDeletedAt(now);
     guard.getUser().setDeletedAt(now); // Soft delete the user account too
     guardRepository.save(guard);

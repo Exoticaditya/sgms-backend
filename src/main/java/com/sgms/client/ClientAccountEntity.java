@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.Instant;
 
@@ -25,17 +26,29 @@ public class ClientAccountEntity {
   @Column(name = "created_at", nullable = false)
   private Instant createdAt;
 
+  @Column(name = "updated_at", nullable = false)
+  private Instant updatedAt;
+
   @Column(name = "deleted_at")
   private Instant deletedAt;
 
   @PrePersist
   public void prePersist() {
+    Instant now = Instant.now();
     if (createdAt == null) {
-      createdAt = Instant.now();
+      createdAt = now;
+    }
+    if (updatedAt == null) {
+      updatedAt = now;
     }
     if (status == null) {
       status = "ACTIVE";
     }
+  }
+
+  @PreUpdate
+  public void preUpdate() {
+    updatedAt = Instant.now();
   }
 
   public Long getId() {
@@ -76,5 +89,13 @@ public class ClientAccountEntity {
 
   public void setDeletedAt(Instant deletedAt) {
     this.deletedAt = deletedAt;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public void setUpdatedAt(Instant updatedAt) {
+    this.updatedAt = updatedAt;
   }
 }

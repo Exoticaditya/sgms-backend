@@ -104,8 +104,10 @@ public class SecurityConfig {
     config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
     config.setExposedHeaders(List.of("Authorization"));
     
-    // Disable credentials for security (prevents CSRF attacks with wildcards)
-    config.setAllowCredentials(false);
+    // Enable credentials for JWT token transmission
+    // WARNING: When credentials=true, wildcard origins are not allowed
+    // All origins must be explicitly listed without wildcards
+    config.setAllowCredentials(true);
     
     // Apply to all endpoints
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

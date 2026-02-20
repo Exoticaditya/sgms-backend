@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -15,10 +16,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class JwtService {
   private final JwtProperties properties;
+  private final Clock clock;
   private SecretKey signingKey;
 
-  public JwtService(JwtProperties properties) {
+  public JwtService(JwtProperties properties, Clock clock) {
     this.properties = properties;
+    this.clock = clock;
     String secret = properties.getSecret();
     if (secret == null || secret.isBlank()) {
       throw new IllegalStateException("JWT secret is required (set APP_SECURITY_JWT_SECRET / app.security.jwt.secret)");
@@ -31,7 +34,7 @@ public class JwtService {
   }
 
   public String generateAccessToken(String subject, String email, Set<String> roleNames) {
-    Instant now = Instant.now();
+    Instant now = clock.instant();
     Instant expiresAt = now.plusSeconds(properties.getAccessTokenTtlSeconds());
     return Jwts.builder()
         .subject(subject)

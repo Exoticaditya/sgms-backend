@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
+import java.time.Clock;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,14 +22,17 @@ public class ClientSiteAccessService {
   private final ClientSiteAccessRepository clientSiteAccessRepository;
   private final UserRepository userRepository;
   private final SiteRepository siteRepository;
+  private final Clock clock;
 
   public ClientSiteAccessService(
       ClientSiteAccessRepository clientSiteAccessRepository,
       UserRepository userRepository,
-      SiteRepository siteRepository) {
+      SiteRepository siteRepository,
+      Clock clock) {
     this.clientSiteAccessRepository = clientSiteAccessRepository;
     this.userRepository = userRepository;
     this.siteRepository = siteRepository;
+    this.clock = clock;
   }
 
   /**
@@ -117,7 +120,7 @@ public class ClientSiteAccessService {
             clientUserId + " and site " + siteId
         ));
 
-    access.setRevokedAt(Instant.now());
+    access.setRevokedAt(clock.instant());
     clientSiteAccessRepository.save(access);
   }
 

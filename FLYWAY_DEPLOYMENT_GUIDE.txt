@@ -1,0 +1,128 @@
+=====================================
+FLYWAY MIGRATION DEPLOYMENT COMMANDS
+=====================================
+
+STEP 1: CLEAN PROJECT
+=====================================
+cd c:\Zpluse-Security\backend
+mvn clean
+
+STEP 2: VERIFY DATABASE IS EMPTY (PostgreSQL)
+=====================================
+psql -h <railway-host> -p <railway-port> -U <railway-user> -d railway
+
+\dt
+
+DROP TABLE IF EXISTS flyway_schema_history CASCADE;
+DROP TABLE IF EXISTS attendance_logs CASCADE;
+DROP TABLE IF EXISTS guard_assignments CASCADE;
+DROP TABLE IF EXISTS shift_types CASCADE;
+DROP TABLE IF EXISTS guards CASCADE;
+DROP TABLE IF EXISTS client_site_access CASCADE;
+DROP TABLE IF EXISTS supervisor_site_mapping CASCADE;
+DROP TABLE IF EXISTS site_posts CASCADE;
+DROP TABLE IF EXISTS sites CASCADE;
+DROP TABLE IF EXISTS client_accounts CASCADE;
+DROP TABLE IF EXISTS user_roles CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS roles CASCADE;
+DROP FUNCTION IF EXISTS set_updated_at() CASCADE;
+DROP EXTENSION IF EXISTS pgcrypto CASCADE;
+
+\q
+
+STEP 3: START SPRING BOOT
+=====================================
+mvn spring-boot:run
+
+STEP 4: VERIFY FLYWAY SUCCESS
+=====================================
+
+Look for:
+[INFO] Flyway Community Edition X.X.X
+[INFO] Database: jdbc:postgresql://...
+[INFO] Successfully validated 6 migrations
+[INFO] Current version of schema "public": << Empty Schema >>
+[INFO] Migrating schema "public" to version "1 - rbac"
+[INFO] Migrating schema "public" to version "2 - clients sites"
+[INFO] Migrating schema "public" to version "3 - guards"
+[INFO] Migrating schema "public" to version "4 - assignments"
+[INFO] Migrating schema "public" to version "5 - attendance"
+[INFO] Migrating schema "public" to version "6 - seed admin"
+[INFO] Successfully applied 6 migrations
+
+=====================================
+LOGIN WITH ADMIN ACCOUNT
+=====================================
+Email: admin@sgms.com
+Password: Admin@123
+
+=====================================
+VERIFY DATABASE TABLES
+=====================================
+psql -h <railway-host> -p <railway-port> -U <railway-user> -d railway
+
+\dt
+
+Should show:
+ roles
+ users
+ user_roles
+ client_accounts
+ sites
+ site_posts
+ supervisor_site_mapping
+ client_site_access
+ guards
+ shift_types
+ guard_assignments
+ attendance_logs
+ flyway_schema_history
+
+\d users
+
+Should show:
+ id | bigint | not null
+ email | character varying(255) | not null
+ phone | character varying(30) |
+ password_hash | character varying(255) | not null
+ full_name | character varying(255) |
+ status | character varying(20) | not null
+ created_at | timestamp with time zone | not null
+ updated_at | timestamp with time zone | not null
+ deleted_at | timestamp with time zone |
+
+\q
+
+=====================================
+MIGRATIONS SUMMARY
+=====================================
+
+V1__rbac.sql
+- roles (id, name)
+- users (id, email, phone, password_hash, full_name, status, created_at, updated_at, deleted_at)
+- user_roles (user_id, role_id) [composite PK]
+- Seeds: ADMIN, SUPERVISOR, GUARD, CLIENT roles
+
+V2__clients_sites.sql
+- client_accounts (id, name, status, created_at, deleted_at)
+- sites (id, client_account_id, name, address, latitude, longitude, status, created_at, updated_at, deleted_at)
+- site_posts (id, site_id, post_name, description, required_guards, status, created_at, updated_at, deleted_at)
+- supervisor_site_mapping (id, supervisor_user_id, site_id, assigned_at, removed_at)
+- client_site_access (id, client_user_id, site_id, granted_at, revoked_at)
+
+V3__guards.sql
+- guards (id, user_id, supervisor_user_id, employee_code, first_name, last_name, phone, status, hire_date, base_salary, per_day_rate, overtime_rate, created_at, updated_at, deleted_at)
+
+V4__assignments.sql
+- shift_types (id, name, start_time, end_time, description, created_at)
+- guard_assignments (id, guard_id, site_post_id, shift_type_id, effective_from, effective_to, status, notes, created_at, updated_at, created_by_user_id)
+- Seeds: DAY, EVENING, NIGHT shifts
+
+V5__attendance.sql
+- attendance_logs (id, guard_id, assignment_id, attendance_date, check_in_time, check_out_time, status, late_minutes, early_leave_minutes, notes, created_at, updated_at)
+- Unique constraint: (guard_id, attendance_date)
+
+V6__seed_admin.sql
+- Creates admin@sgms.com with ADMIN role
+- Password: Admin@123

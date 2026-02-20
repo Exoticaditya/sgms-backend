@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Clock;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,6 +29,11 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
   private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+  private final Clock clock;
+
+  public GlobalExceptionHandler(Clock clock) {
+    this.clock = clock;
+  }
 
   /**
    * Handle validation errors (Bean Validation)
@@ -48,12 +54,7 @@ public class GlobalExceptionHandler {
         .map(entry -> entry.getKey() + " - " + entry.getValue())
         .collect(Collectors.joining(", "));
 
-    ErrorResponse errorResponse = new ErrorResponse(
-        "VALIDATION_ERROR",
-        message,
-        HttpStatus.BAD_REQUEST.value(),
-        request.getRequestURI()
-    );
+    ErrorResponse errorResponse = new ErrorResponse(message, request.getRequestURI(), clock);
 
     logger.warn("Validation error: {} on {}", message, request.getRequestURI());
     
@@ -68,12 +69,7 @@ public class GlobalExceptionHandler {
       IllegalArgumentException ex,
       HttpServletRequest request) {
     
-    ErrorResponse errorResponse = new ErrorResponse(
-        "INVALID_ARGUMENT",
-        ex.getMessage(),
-        HttpStatus.BAD_REQUEST.value(),
-        request.getRequestURI()
-    );
+    ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), request.getRequestURI(), clock);
 
     logger.warn("Invalid argument: {} on {}", ex.getMessage(), request.getRequestURI());
     
@@ -89,10 +85,9 @@ public class GlobalExceptionHandler {
       HttpServletRequest request) {
     
     ErrorResponse errorResponse = new ErrorResponse(
-        "FORBIDDEN",
         "You do not have permission to access this resource",
-        HttpStatus.FORBIDDEN.value(),
-        request.getRequestURI()
+        request.getRequestURI(),
+        clock
     );
 
     logger.warn("Access denied: {} attempted to access {}", 
@@ -109,12 +104,7 @@ public class GlobalExceptionHandler {
       UsernameNotFoundException ex,
       HttpServletRequest request) {
     
-    ErrorResponse errorResponse = new ErrorResponse(
-        "UNAUTHORIZED",
-        "Invalid credentials",
-        HttpStatus.UNAUTHORIZED.value(),
-        request.getRequestURI()
-    );
+    ErrorResponse errorResponse = new ErrorResponse("Invalid credentials", request.getRequestURI(), clock);
 
     logger.warn("Username not found: {} on {}", ex.getMessage(), request.getRequestURI());
     
@@ -129,12 +119,8 @@ public class GlobalExceptionHandler {
       ResponseStatusException ex,
       HttpServletRequest request) {
     
-    ErrorResponse errorResponse = new ErrorResponse(
-        ex.getStatusCode().toString(),
-        ex.getReason() != null ? ex.getReason() : "An error occurred",
-        ex.getStatusCode().value(),
-        request.getRequestURI()
-    );
+    String message = ex.getReason() != null ? ex.getReason() : "An error occurred";
+    ErrorResponse errorResponse = new ErrorResponse(message, request.getRequestURI(), clock);
 
     logger.warn("Response status exception: {} on {}", ex.getReason(), request.getRequestURI());
     
@@ -150,10 +136,9 @@ public class GlobalExceptionHandler {
       HttpServletRequest request) {
     
     ErrorResponse errorResponse = new ErrorResponse(
-        "INTERNAL_SERVER_ERROR",
         "An unexpected error occurred. Please try again later.",
-        HttpStatus.INTERNAL_SERVER_ERROR.value(),
-        request.getRequestURI()
+        request.getRequestURI(),
+        clock
     );
 
     // Log full stacktrace server-side (never sent to client)

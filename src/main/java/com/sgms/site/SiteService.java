@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,10 +22,12 @@ public class SiteService {
 
   private final SiteRepository siteRepository;
   private final ClientAccountRepository clientAccountRepository;
+  private final Clock clock;
 
-  public SiteService(SiteRepository siteRepository, ClientAccountRepository clientAccountRepository) {
+  public SiteService(SiteRepository siteRepository, ClientAccountRepository clientAccountRepository, Clock clock) {
     this.siteRepository = siteRepository;
     this.clientAccountRepository = clientAccountRepository;
+    this.clock = clock;
   }
 
   /**
@@ -114,7 +117,7 @@ public class SiteService {
             "Site not found with id: " + id
         ));
 
-    site.setDeletedAt(Instant.now());
+    site.setDeletedAt(clock.instant());
     site.setStatus("DELETED");
     siteRepository.save(site);
   }

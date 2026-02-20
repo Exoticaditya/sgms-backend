@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 public interface GuardRepository extends JpaRepository<GuardEntity, Long> {
   
   @Query("SELECT g FROM GuardEntity g WHERE g.deletedAt IS NULL")
-  List<List<GuardEntity>> findAllActive();
+  List<GuardEntity> findAllActive();
 
   @Query("SELECT g FROM GuardEntity g WHERE g.supervisor.id = :supervisorId AND g.deletedAt IS NULL")
   List<GuardEntity> findBySupervisorId(@Param("supervisorId") Long supervisorId);
@@ -17,5 +17,9 @@ public interface GuardRepository extends JpaRepository<GuardEntity, Long> {
   @Query("SELECT g FROM GuardEntity g WHERE g.id = :id AND g.deletedAt IS NULL")
   Optional<GuardEntity> findByIdActive(@Param("id") Long id);
 
-  boolean existsByEmployeeCode(String employeeCode);
+  @Query("SELECT g FROM GuardEntity g WHERE g.id = :id AND g.deletedAt IS NULL")
+  Optional<GuardEntity> findActiveById(@Param("id") Long id);
+
+  @Query("SELECT COUNT(g) > 0 FROM GuardEntity g WHERE g.employeeCode = :employeeCode AND g.deletedAt IS NULL")
+  boolean existsByEmployeeCode(@Param("employeeCode") String employeeCode);
 }
