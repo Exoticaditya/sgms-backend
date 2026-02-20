@@ -5,9 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import java.time.Instant;
 import java.time.LocalTime;
 
 /**
@@ -39,18 +37,7 @@ public class ShiftTypeEntity {
   private String description;
 
   @Column(name = "created_at", nullable = false)
-  private Instant createdAt;
-
-  @PrePersist
-  public void prePersist() {
-    if (createdAt == null) {
-      createdAt = Instant.now();
-    }
-    // Ensure name is uppercase (database constraint enforces this)
-    if (name != null) {
-      name = name.toUpperCase();
-    }
-  }
+  private java.time.Instant createdAt;
 
   // Getters and Setters
 
@@ -94,11 +81,11 @@ public class ShiftTypeEntity {
     this.description = description;
   }
 
-  public Instant getCreatedAt() {
+  public java.time.Instant getCreatedAt() {
     return createdAt;
   }
 
-  public void setCreatedAt(Instant createdAt) {
+  public void setCreatedAt(java.time.Instant createdAt) {
     this.createdAt = createdAt;
   }
 }

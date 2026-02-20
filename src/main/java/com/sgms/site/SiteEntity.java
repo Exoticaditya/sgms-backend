@@ -56,6 +56,9 @@ public class SiteEntity {
   @Column(name = "deleted_at")
   private Instant deletedAt;
 
+  @Column(name = "active", nullable = false)
+  private Boolean active = true;
+
   @PrePersist
   public void prePersist() {
     Instant now = Instant.now();
@@ -67,6 +70,9 @@ public class SiteEntity {
     }
     if (status == null) {
       status = "ACTIVE";
+    }
+    if (active == null) {
+      active = true;
     }
   }
 
@@ -155,5 +161,13 @@ public class SiteEntity {
 
   public void setDeletedAt(Instant deletedAt) {
     this.deletedAt = deletedAt;
+  }
+
+  public Boolean getActive() {
+    return active;
+  }
+
+  public void setActive(Boolean active) {
+    this.active = active;
   }
 }

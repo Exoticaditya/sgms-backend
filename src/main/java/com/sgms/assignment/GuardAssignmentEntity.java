@@ -33,7 +33,7 @@ public class GuardAssignmentEntity {
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name = "guard_id", nullable = false)
+  @JoinColumn(name = "guard_id")
   private GuardEntity guard;
 
   @ManyToOne
@@ -50,8 +50,11 @@ public class GuardAssignmentEntity {
   @Column(name = "effective_to")
   private LocalDate effectiveTo;
 
-  @Column(name = "status", nullable = false, length = 20)
-  private String status;
+  @Column(name = "active", nullable = false)
+  private Boolean active = true;
+
+  @Column(name = "status", length = 20, nullable = false)
+  private String status = "ACTIVE";
 
   @Column(name = "notes", columnDefinition = "TEXT")
   private String notes;
@@ -63,7 +66,7 @@ public class GuardAssignmentEntity {
   private Instant updatedAt;
 
   @ManyToOne
-  @JoinColumn(name = "created_by_user_id", nullable = false)
+  @JoinColumn(name = "created_by_user_id")
   private UserEntity createdBy;
 
   @PrePersist
@@ -75,8 +78,8 @@ public class GuardAssignmentEntity {
     if (updatedAt == null) {
       updatedAt = now;
     }
-    if (status == null) {
-      status = "ACTIVE";
+    if (active == null) {
+      active = true;
     }
   }
 
@@ -135,12 +138,12 @@ public class GuardAssignmentEntity {
     this.effectiveTo = effectiveTo;
   }
 
-  public String getStatus() {
-    return status;
+  public Boolean getActive() {
+    return active;
   }
 
-  public void setStatus(String status) {
-    this.status = status;
+  public void setActive(Boolean active) {
+    this.active = active;
   }
 
   public String getNotes() {
@@ -173,5 +176,13 @@ public class GuardAssignmentEntity {
 
   public void setCreatedBy(UserEntity createdBy) {
     this.createdBy = createdBy;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
   }
 }

@@ -83,8 +83,7 @@ public class AttendanceService {
     GuardEntity guard = guardRepository.findActiveById(request.getGuardId())
         .orElseThrow(() -> new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
-            "Guard not found or inactive with id: " + request.getGuardId()
-        ));
+            "Guard not found or inactive with id: " + request.getGuardId()));
 
     // 2. Verify guard has active assignment for today
     List<GuardAssignmentEntity> activeAssignments = assignmentRepository
@@ -93,11 +92,11 @@ public class AttendanceService {
     if (activeAssignments.isEmpty()) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "No active assignment found for guard today. Cannot check in."
-      );
+          "No active assignment found for guard today. Cannot check in.");
     }
 
-    // Get the first active assignment (guards should have only one active assignment per date)
+    // Get the first active assignment (guards should have only one active
+    // assignment per date)
     GuardAssignmentEntity assignment = activeAssignments.get(0);
     ShiftTypeEntity shift = assignment.getShiftType();
 
@@ -105,8 +104,7 @@ public class AttendanceService {
     if (attendanceRepository.existsByGuardIdAndDate(request.getGuardId(), today)) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "Attendance already recorded for today. Cannot check in again."
-      );
+          "Attendance already recorded for today. Cannot check in again.");
     }
 
     // 4. Validate check-in time window
@@ -119,13 +117,12 @@ public class AttendanceService {
 
     // Handle overnight shifts (e.g., 22:00 - 06:00)
     boolean isOvernight = shift.getStartTime().isAfter(shift.getEndTime());
-    
+
     if (!isOvernight && (checkInTime.isBefore(earliestCheckIn) || checkInTime.isAfter(latestCheckIn))) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
           String.format("Check-in window is %s to %s. Current time %s is outside allowed window.",
-              earliestCheckIn, latestCheckIn, checkInTime)
-      );
+              earliestCheckIn, latestCheckIn, checkInTime));
     }
 
     // 5. Determine if late and calculate late minutes
@@ -167,26 +164,23 @@ public class AttendanceService {
     LocalDate today = LocalDate.now(clock);
     Instant now = clock.instant();
 
-    // 1. Validate guard
-    GuardEntity guard = guardRepository.findById(request.getGuardId())
+    // 1. Validate guard exists
+    guardRepository.findById(request.getGuardId())
         .orElseThrow(() -> new ResponseStatusException(
             HttpStatus.NOT_FOUND,
-            "Guard not found with id: " + request.getGuardId()
-        ));
+            "Guard not found with id: " + request.getGuardId()));
 
     // 2. Find attendance record for today
     AttendanceEntity attendance = attendanceRepository.findByGuardIdAndDate(request.getGuardId(), today)
         .orElseThrow(() -> new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
-            "No check-in record found for today. Please check in first."
-        ));
+            "No check-in record found for today. Please check in first."));
 
     // 3. Verify not already checked out
     if (attendance.getCheckOutTime() != null) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "Already checked out today. Cannot check out again."
-      );
+          "Already checked out today. Cannot check out again.");
     }
 
     // 4. Determine if early leave and calculate early leave minutes
@@ -199,10 +193,11 @@ public class AttendanceService {
     AttendanceStatus finalStatus = attendance.getStatus(); // Keep LATE status if was late
 
     // If guard was PRESENT and checks out early, mark as EARLY_LEAVE
-    // If guard was LATE and checks out early, status remains LATE (late is more severe)
+    // If guard was LATE and checks out early, status remains LATE (late is more
+    // severe)
     if (checkOutTime.isBefore(shiftEnd)) {
       earlyLeaveMinutes = (int) Duration.between(checkOutTime, shiftEnd).toMinutes();
-      
+
       // Only change to EARLY_LEAVE if guard was PRESENT (not already LATE)
       if (attendance.getStatus() == AttendanceStatus.PRESENT) {
         finalStatus = AttendanceStatus.EARLY_LEAVE;
@@ -213,11 +208,11 @@ public class AttendanceService {
     attendance.setCheckOutTime(now);
     attendance.setStatus(finalStatus);
     attendance.setEarlyLeaveMinutes(earlyLeaveMinutes);
-    
+
     // Append checkout notes if provided
     if (request.getNotes() != null && !request.getNotes().isEmpty()) {
       String existingNotes = attendance.getNotes();
-      String combinedNotes = existingNotes != null 
+      String combinedNotes = existingNotes != null
           ? existingNotes + " | Checkout: " + request.getNotes()
           : "Checkout: " + request.getNotes();
       attendance.setNotes(combinedNotes);
@@ -236,8 +231,7 @@ public class AttendanceService {
     guardRepository.findById(guardId)
         .orElseThrow(() -> new ResponseStatusException(
             HttpStatus.NOT_FOUND,
-            "Guard not found with id: " + guardId
-        ));
+            "Guard not found with id: " + guardId));
 
     return attendanceRepository.findByGuardId(guardId)
         .stream()
@@ -276,8 +270,7 @@ public class AttendanceService {
     AttendanceEntity attendance = attendanceRepository.findById(id)
         .orElseThrow(() -> new ResponseStatusException(
             HttpStatus.NOT_FOUND,
-            "Attendance record not found with id: " + id
-        ));
+            "Attendance record not found with id: " + id));
     return mapToResponse(attendance);
   }
 
@@ -305,7 +298,7 @@ public class AttendanceService {
     response.setGuardId(guard.getId());
     response.setGuardFirstName(guard.getFirstName());
     response.setGuardLastName(guard.getLastName());
-    response.setGuardFullName(guard.getFirstName() + " " + 
+    response.setGuardFullName(guard.getFirstName() + " " +
         (guard.getLastName() != null ? guard.getLastName() : ""));
     response.setEmployeeCode(guard.getEmployeeCode());
 

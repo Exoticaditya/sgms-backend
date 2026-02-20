@@ -43,8 +43,11 @@ public class GuardEntity {
   @Column(name = "phone", length = 30)
   private String phone;
 
-  @Column(name = "status", nullable = false, length = 20)
-  private String status;
+  @Column(name = "active", nullable = false)
+  private Boolean active = true;
+
+  @Column(name = "status", length = 20, nullable = false)
+  private String status = "ACTIVE";
 
   @Column(name = "hire_date")
   private LocalDate hireDate;
@@ -72,7 +75,7 @@ public class GuardEntity {
     Instant now = Instant.now();
     if (createdAt == null) createdAt = now;
     if (updatedAt == null) updatedAt = now;
-    if (status == null) status = "ACTIVE";
+    if (active == null) active = true;
     if (baseSalary == null) baseSalary = BigDecimal.ZERO;
     if (perDayRate == null) perDayRate = BigDecimal.ZERO;
     if (overtimeRate == null) overtimeRate = BigDecimal.ZERO;
@@ -106,8 +109,8 @@ public class GuardEntity {
   public String getPhone() { return phone; }
   public void setPhone(String phone) { this.phone = phone; }
 
-  public String getStatus() { return status; }
-  public void setStatus(String status) { this.status = status; }
+  public Boolean getActive() { return active; }
+  public void setActive(Boolean active) { this.active = active; }
 
   public LocalDate getHireDate() { return hireDate; }
   public void setHireDate(LocalDate hireDate) { this.hireDate = hireDate; }
@@ -129,4 +132,7 @@ public class GuardEntity {
 
   public Instant getDeletedAt() { return deletedAt; }
   public void setDeletedAt(Instant deletedAt) { this.deletedAt = deletedAt; }
+
+  public String getStatus() { return status; }
+  public void setStatus(String status) { this.status = status; }
 }

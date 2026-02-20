@@ -3,7 +3,7 @@ SET search_path TO public;
 INSERT INTO users (email,password_hash,full_name,status)
 VALUES (
 'admin@sgms.com',
-'$2a$10$8K1p/a0dL3.W5vSTL0qLc.zX5BYM0f5F7E5JN1O0R8zX5BYM0f5F7',
+crypt('Admin@123', gen_salt('bf')),
 'System Administrator',
 'ACTIVE'
 )

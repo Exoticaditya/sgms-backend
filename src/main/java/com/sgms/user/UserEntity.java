@@ -47,6 +47,9 @@ public class UserEntity {
   @Column(name = "deleted_at")
   private Instant deletedAt;
 
+  @Column(name = "active", nullable = false)
+  private Boolean active = true;
+
   @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(
       name = "user_roles",
@@ -66,6 +69,9 @@ public class UserEntity {
     }
     if (status == null) {
       status = "ACTIVE";
+    }
+    if (active == null) {
+      active = true;
     }
   }
 
@@ -152,5 +158,13 @@ public class UserEntity {
 
   public void setRoles(Set<RoleEntity> roles) {
     this.roles = roles;
+  }
+
+  public Boolean getActive() {
+    return active;
+  }
+
+  public void setActive(Boolean active) {
+    this.active = active;
   }
 }

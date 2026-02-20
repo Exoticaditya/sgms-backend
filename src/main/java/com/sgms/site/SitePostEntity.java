@@ -41,8 +41,11 @@ public class SitePostEntity {
   @Column(name = "required_guards", nullable = false)
   private Integer requiredGuards = 1;
 
-  @Column(name = "status", nullable = false, length = 20)
-  private String status;
+  @Column(name = "active", nullable = false)
+  private Boolean active = true;
+
+  @Column(name = "status", length = 20, nullable = false)
+  private String status = "ACTIVE";
 
   @Column(name = "created_at", nullable = false)
   private Instant createdAt;
@@ -62,8 +65,8 @@ public class SitePostEntity {
     if (updatedAt == null) {
       updatedAt = now;
     }
-    if (status == null) {
-      status = "ACTIVE";
+    if (active == null) {
+      active = true;
     }
     if (requiredGuards == null) {
       requiredGuards = 1;
@@ -117,12 +120,12 @@ public class SitePostEntity {
     this.requiredGuards = requiredGuards;
   }
 
-  public String getStatus() {
-    return status;
+  public Boolean getActive() {
+    return active;
   }
 
-  public void setStatus(String status) {
-    this.status = status;
+  public void setActive(Boolean active) {
+    this.active = active;
   }
 
   public Instant getCreatedAt() {
@@ -147,5 +150,13 @@ public class SitePostEntity {
 
   public void setDeletedAt(Instant deletedAt) {
     this.deletedAt = deletedAt;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
   }
 }

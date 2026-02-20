@@ -21,7 +21,8 @@ import java.time.LocalDate;
  * AttendanceEntity - Core attendance tracking entity
  * 
  * Represents a guard's daily attendance record with check-in/out times.
- * Status is auto-calculated based on shift timings and actual check-in/out times.
+ * Status is auto-calculated based on shift timings and actual check-in/out
+ * times.
  * 
  * Table: attendance_logs
  * 
@@ -43,11 +44,11 @@ public class AttendanceEntity {
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name = "guard_id", nullable = false)
+  @JoinColumn(name = "guard_id")
   private GuardEntity guard;
 
   @ManyToOne
-  @JoinColumn(name = "assignment_id", nullable = false)
+  @JoinColumn(name = "assignment_id")
   private GuardAssignmentEntity assignment;
 
   @Column(name = "attendance_date", nullable = false)

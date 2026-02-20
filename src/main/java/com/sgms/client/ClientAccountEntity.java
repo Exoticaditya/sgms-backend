@@ -32,6 +32,9 @@ public class ClientAccountEntity {
   @Column(name = "deleted_at")
   private Instant deletedAt;
 
+  @Column(name = "active", nullable = false)
+  private Boolean active = true;
+
   @PrePersist
   public void prePersist() {
     Instant now = Instant.now();
@@ -43,6 +46,9 @@ public class ClientAccountEntity {
     }
     if (status == null) {
       status = "ACTIVE";
+    }
+    if (active == null) {
+      active = true;
     }
   }
 
@@ -97,5 +103,13 @@ public class ClientAccountEntity {
 
   public void setUpdatedAt(Instant updatedAt) {
     this.updatedAt = updatedAt;
+  }
+
+  public Boolean getActive() {
+    return active;
+  }
+
+  public void setActive(Boolean active) {
+    this.active = active;
   }
 }
